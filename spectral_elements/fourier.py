@@ -16,20 +16,27 @@ def DiscreteFourierCoefficients(func_evaluation):
 
     # Number of points
     n = len(func_evaluation)
-    k_min = -floor(n / 2)
-    k_max = floor(n / 2)
+
+    # N must be even
+    if n % 2 != 0:
+        raise ValueError('The number of points must be even.')
+
+    k_min = -n / 2
+    k_max = n / 2
+    K = np.linspace(k_min, k_max, n + 1)
 
     # Initialize the list of coefficients
     fourier_coefficients = []
 
     # Loop over the coefficients
-    for k in range(k_min, k_max + 1):
+    for k_i in range(n + 1):
+        k = K[k_i]
         # Initialize the sum
         sum = 0
 
         # Loop over the points
         for j in range(0, n):
-            sum += func_evaluation[j] * np.exp(-2.0 * pi * i * j * k / n)
+            sum += func_evaluation[j] * np.exp(-2. * pi * i * j * k / n)
 
         # Append the coefficient
         fourier_coefficients.append(sum / n)
@@ -53,16 +60,21 @@ def FourierInterpolantFromModes(fourier_coefficients, x):
     # Initialize the list of values
     values = []
 
-    n = len(fourier_coefficients)
-    k_min = -floor(n / 2)
-    k_max = floor(n / 2)
-    K = np.linspace(k_min, k_max, n)
+    n = len(fourier_coefficients) - 1
+
+    # N must be odd
+    if n % 2 != 0:
+        raise ValueError('The number of Fourier coefficients must be odd.')
+
+    k_min = -n / 2
+    k_max = n / 2
+    K = np.linspace(k_min, k_max, n + 1)
 
     # Loop over the points
     for x_i in x:
         # Initialize the sum
-        sum = (fourier_coefficients[0] * np.exp(-i * K[0] * x_i) +
-               fourier_coefficients[-1] * np.exp(i * K[-1] * x_i)) / 2
+        sum = 0.5 * (fourier_coefficients[0] * np.exp(-i * n * x_i / 2) +
+                     fourier_coefficients[-1] * np.exp(i * n * x_i / 2))
 
         # Loop over the coefficients
         for k_i in range(1, len(K) - 1):
